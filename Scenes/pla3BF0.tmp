@@ -1,8 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://ck7ctmiwj1hfi"]
+[gd_scene load_steps=11 format=3 uid="uid://ck7ctmiwj1hfi"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_heo2u"]
 [ext_resource type="Texture2D" uid="uid://bocrqaf5nd28h" path="res://Assets/Soldier.png" id="2_7x5e5"]
-[ext_resource type="Script" path="res://Scripts/PlayerAnimationManager.gd" id="3_jvvny"]
 
 [sub_resource type="Animation" id="Animation_unv2g"]
 length = 0.001
@@ -20,8 +19,9 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id="Animation_nxcac"]
-resource_name = "bow_attack"
+resource_name = "bow_atack"
 length = 0.9
+loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -53,7 +53,7 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id="Animation_hb4m7"]
-resource_name = "sword_attack"
+resource_name = "sword_atack"
 length = 0.5
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -69,7 +69,7 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id="Animation_sy5ry"]
-resource_name = "sword_attack2"
+resource_name = "sword_atack2"
 length = 0.6
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -104,10 +104,10 @@ tracks/0/keys = {
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_otc7m"]
 _data = {
 "RESET": SubResource("Animation_unv2g"),
-"bow_attack": SubResource("Animation_nxcac"),
+"bow_atack": SubResource("Animation_nxcac"),
 "idle": SubResource("Animation_qgwo7"),
-"sword_attack": SubResource("Animation_hb4m7"),
-"sword_attack2": SubResource("Animation_sy5ry"),
+"sword_atack": SubResource("Animation_hb4m7"),
+"sword_atack2": SubResource("Animation_sy5ry"),
 "walk": SubResource("Animation_c8ai1")
 }
 
@@ -118,7 +118,7 @@ radius = 2.0
 z_index = 5
 scale = Vector2(2, 2)
 script = ExtResource("1_heo2u")
-attack_cool_down = 0.5
+metadata/speed = 0.0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../Sprite2D")
@@ -126,23 +126,16 @@ libraries = {
 "": SubResource("AnimationLibrary_otc7m")
 }
 autoplay = "idle"
-script = ExtResource("3_jvvny")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-z_index = 5
-position = Vector2(0, -5)
-scale = Vector2(3, 3)
-shape = SubResource("CircleShape2D_knucp")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture_filter = 1
 position = Vector2(0, -6)
 texture = ExtResource("2_7x5e5")
 hframes = 9
 vframes = 7
 frame = 1
 
-[connection signal="animationFinished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
-[connection signal="animation_changed" from="AnimationPlayer" to="AnimationPlayer" method="_on_animation_changed"]
-[connection signal="current_animation_changed" from="AnimationPlayer" to="AnimationPlayer" method="_on_current_animation_changed"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 5
+position = Vector2(0, -5)
+scale = Vector2(3, 3)
+shape = SubResource("CircleShape2D_knucp")

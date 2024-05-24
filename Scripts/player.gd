@@ -1,91 +1,47 @@
+class_name Player
 extends CharacterBody2D
 
-var speed = 200
-var attack_cool_down = 1
-var animationPlayer = null
+const Actions = preload("res://Scripts/PlayerActions.gd").Actions
+const PlayerStateMachine = preload("res://Scripts/PlayerStateMachine.gd").PlayerStateMachine
 
-var idle = 0
-var walking = 1
-var attacking = 2
+const PlayerInputManager = preload("res://Scripts/PlayerInputManager.gd").PlayerInputManager
+const InputClass = preload("res://Scripts/PlayerInputManager.gd").InputClass
+const DirEnum = preload("res://Scripts/PlayerInputManager.gd").DirEnum
 
-var playerState = idle
+@onready var sprite_2d = $Sprite2D
+
+@export var speed:float = 200
+@export_range(0,5,.1) var attack_cool_down:float = 1
+
+@onready var animationPlayer = $AnimationPlayer
+var playerState:PlayerStateMachine = PlayerStateMachine.new(Actions.IDLE)
+
+var last_player_state = Actions.IDLE
+var is_state_transition = false
 
 func _ready():
-	animationPlayer = get_node("AnimationPlayer")
+	animationPlayer.playAnimation(Actions.IDLE)
 
-var last_player_state = idle
-var is_state_transition = false
 func readInput():
-	var direction = Input.get_vector("left", "right", "up", "down")
-	velocity = direction.normalized() * speed
-	var move_command = (direction != Vector2(0,0))
-	var attack_command = Input.is_action_pressed("atack") and !is_attack_in_cooldown()
-	if(get_player_state() == idle):
-		if(attack_command):
-			set_player_state(attacking)
-		elif(move_command):
-			set_player_state(walking)
-	elif(get_player_state() == walking):
+	var inputData:InputClass = PlayerInputManager.processInput()
+	
+	velocity = inputData.direction.normalized() * speed
+	
+	if(inputData.orientationX == DirEnum.LEFT):
+		sprite_2d.flip_h = true
+	elif(inputData.orientationX == DirEnum.RIGHT):
+		sprite_2d.flip_h = false
+	
+	playerState.processState(inputData, animationPlayer)
+	
+	if(is_walking()):
 		move_and_slide()
-		if(attack_command):
-			set_player_state(attacking)
-		elif(!move_command):
-			set_player_state(idle)
-	elif(get_player_state() == attacking):
-		if(!is_playing_attack_animation()):
-			if(move_command):
-				set_player_state(walking)
-				move_and_slide()
-			else:
-				set_player_state(idle)
-				
-	if(get_player_state() != last_player_state):
-		is_state_transition = true
-		last_player_state = get_player_state()
-	else:
-		is_state_transition = false
 
-var attackTime = attack_cool_down + 1
-func animate():
-	attackTime += get_process_delta_time()
-	if is_atacking():
-		set_attack_animation()
-		if(is_state_transition):
-			attackTime = 0
-	elif is_walking():
-		animationPlayer.play("walk")
-	else:
-		animationPlayer.play("idle")		
-
-func set_player_state(state):
-	playerState = state
-
-func get_player_state():
-	return playerState
-
-func _physics_process(delta):
+func _physics_process(_delta):
 	readInput()
-	animate()
 	
 func is_walking():
-	return get_player_state() == walking
+	return playerState.getState() == Actions.WALK
 	
-func is_atacking():
-	return get_player_state() == attacking
-
-func is_playing_attack_animation():
-	return animationPlayer.current_animation == "sword_atack" or animationPlayer.current_animation == "sword_atack2"
-	
-func is_attack_in_cooldown():
-	return attackTime <= attack_cool_down
-
-var last_attack_animation = 2
-func set_attack_animation():
-	if(!is_playing_attack_animation()):
-		if(last_attack_animation == 1 and attackTime <= 1.2 * attack_cool_down):
-			last_attack_animation = 2
-			animationPlayer.play("sword_atack2")
-		else:
-			last_attack_animation = 1
-			animationPlayer.play("sword_atack")
-			
+func _on_animation_player_animation_finished(animation:Actions):
+	print("Finished animation: " + Actions.find_key(animation))

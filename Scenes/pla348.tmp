@@ -136,7 +136,6 @@ scale = Vector2(3, 3)
 shape = SubResource("CircleShape2D_knucp")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture_filter = 1
 position = Vector2(0, -6)
 texture = ExtResource("2_7x5e5")
 hframes = 9
